@@ -1,0 +1,86 @@
+﻿EVALUATE (
+	SUMMARIZE(
+		Fact_OrderLines,
+		Fact_OrderLines[ProductID_SK],
+		"Sum Revenue", sum(Fact_OrderLines[Revenue])
+	)
+)
+
+//---------------------------------------------------------
+EVALUATE(
+	ROW("Total Revenue for 2012",
+		CALCULATE(
+			sum(Fact_OrderLines[Revenue]),
+			'Dim_Date'[Year] = 2011
+		)
+	)
+)
+
+//---------------------------------------------------------
+EVALUATE(
+	row("Totla Refunds",
+		SUMX(FILTER(Fact_OrderLines,Fact_OrderLines[Revenue] < 0),Fact_OrderLines[Revenue])
+	)
+)
+
+//---------------------------------------------------------
+EVALUATE(
+	row("Max Sales",
+		MAX(Fact_OrderLines[Revenue])
+	)
+)
+
+//---------------------------------------------------------
+define
+Var CustAmt = COUNT(Dim_Customers[CustomerID])
+	
+EVALUATE(
+	row("Avg Customer Rev",
+		Sum(Fact_OrderLines[Revenue]) / CustAmt
+	)
+)
+
+//---------------------------------------------------------
+EVALUATE(
+	row("Same Period Last Year",
+		CALCULATE(SUM(Fact_OrderLines[Revenue]),SAMEPERIODLASTYEAR('Dim_Date'[FullDate]))
+	)
+)
+
+//---------------------------------------------------------
+EVALUATE(
+	row("All Revenue By Country",
+		CALCULATE(	sum(Fact_OrderLines[Revenue]), 
+					//Dim_Products[ProductName] = "Health Care",
+					//Dim_Customers[CustomerName] = "Debra",
+					Dim_Region[Country] = "USA",
+					ALL(Dim_Orders)
+				)
+		)			
+)
+
+//---------------------------------------------------------
+EVALUATE(
+	ADDCOLUMNS(Fact_OrderLines, "CName", related(Dim_Customers[CustomerName]))
+)
+
+//---------------------------------------------------------
+EVALUATE(
+	ROW("Total YTD",
+		TOTALYTD(Sum(Fact_OrderLines[Revenue]),'Dim_Date'[FullDate])
+	)
+)
+
+//---------------------------------------------------------
+EVALUATE(
+	ROW("Total QTD",
+		TOTALQTD(Sum(Fact_OrderLines[Revenue]),'Dim_Date'[FullDate])
+	)
+)
+
+//---------------------------------------------------------
+EVALUATE(
+	ROW("Total MTD",
+		TOTALMTD(Sum(Fact_OrderLines[Revenue]),'Dim_Date'[FullDate])
+	)
+)
